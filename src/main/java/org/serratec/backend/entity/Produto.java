@@ -22,7 +22,7 @@ public class Produto {
 	private String descricao;
 	private Double preco;
 	
-	@OneToMany(mappedBy = "id_produto")
+	@OneToMany(mappedBy = "produto")
 	private List<PedidoProduto> pedidoProduto;
 	
 	@ManyToOne

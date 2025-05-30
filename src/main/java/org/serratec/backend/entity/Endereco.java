@@ -7,7 +7,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Embeddable
-@Table(name = "endereco")
 public class Endereco {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,7 +15,6 @@ public class Endereco {
 	private String cep;
 	private String rua;
 	private String bairro;
-
 	private String cidade;
 	private String uf;
 	

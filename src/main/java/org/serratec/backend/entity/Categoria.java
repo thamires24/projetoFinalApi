@@ -1,16 +1,15 @@
 package org.serratec.backend.entity;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "categoria")
 public class Categoria {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,8 +17,8 @@ public class Categoria {
 	
 	private String nomeCategoria;
 	
-	@OneToMany(mappedBy = "id_categoria")
-	private List<Produto> produtos;
+	@OneToMany(mappedBy = "categoria")
+	private Set<Produto> produtos = new HashSet<>();
 
 	public Long getId() {
 		return id;
