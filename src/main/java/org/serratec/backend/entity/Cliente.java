@@ -1,18 +1,18 @@
 package org.serratec.backend.entity;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "cliente")
 public class Cliente {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,9 +26,24 @@ public class Cliente {
 	@Embedded
 	private Endereco endereco;
 	
-	@OneToMany(mappedBy = "id_pedido")
-	private List<Pedido> pedido;
+	@JsonManagedReference
+	@OneToMany(mappedBy = "cliente")
+	private Set<Pedido> pedido = new HashSet<>();
 	
+	
+	
+	public Endereco getEndereco() {
+		return endereco;
+	}
+	public void setEndereco(Endereco endereco) {
+		this.endereco = endereco;
+	}
+	public Set<Pedido> getPedido() {
+		return pedido;
+	}
+	public void setPedido(Set<Pedido> pedido) {
+		this.pedido = pedido;
+	}
 	public Long getId() {
 		return id;
 	}

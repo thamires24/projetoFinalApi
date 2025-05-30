@@ -5,17 +5,18 @@ import java.util.List;
 
 import org.serratec.backend.enums.StatusPedidoEnum;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "pedido")
 public class Pedido {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,12 +27,35 @@ public class Pedido {
 	
 	private StatusPedidoEnum statusPedidoEnum;
 	
+	@JsonBackReference
 	@ManyToOne
+	@JoinColumn(name = "id_cliente")
 	private Cliente cliente;
 	
-	@OneToMany(mappedBy = "id_pedido")
+	@JsonManagedReference
+	@OneToMany(mappedBy = "pedido")
 	private List<PedidoProduto> pedidoProduto;
 	
+	
+	
+	public StatusPedidoEnum getStatusPedidoEnum() {
+		return statusPedidoEnum;
+	}
+	public void setStatusPedidoEnum(StatusPedidoEnum statusPedidoEnum) {
+		this.statusPedidoEnum = statusPedidoEnum;
+	}
+	public Cliente getCliente() {
+		return cliente;
+	}
+	public void setCliente(Cliente cliente) {
+		this.cliente = cliente;
+	}
+	public List<PedidoProduto> getPedidoProduto() {
+		return pedidoProduto;
+	}
+	public void setPedidoProduto(List<PedidoProduto> pedidoProduto) {
+		this.pedidoProduto = pedidoProduto;
+	}
 	public Long getId() {
 		return id;
 	}
