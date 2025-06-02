@@ -1,13 +1,12 @@
 package org.serratec.backend.entity;
 
-import java.util.HashSet;
-import java.util.Set;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 
 @Entity
 public class ClientePerfil {
@@ -17,8 +16,9 @@ public class ClientePerfil {
     private Long id;
     private String nome;
 
-    @OneToMany(mappedBy = "id.perfil")
-    private Set<ClientePerfil> clientePerfis = new HashSet<>();
+    @OneToOne
+    @JoinColumn(name = "id_cliente")
+    private Cliente cliente;
 
 	public Long getId() {
 		return id;
@@ -36,12 +36,12 @@ public class ClientePerfil {
 		this.nome = nome;
 	}
 
-	public Set<ClientePerfil> getClientePerfis() {
-		return clientePerfis;
+	public Cliente getCliente() {
+		return cliente;
 	}
 
-	public void setClientePerfis(Set<ClientePerfil> clientePerfis) {
-		this.clientePerfis = clientePerfis;
+	public void setClientePerfil(Cliente cliente){
+		this.cliente = cliente;
 	}
     
     

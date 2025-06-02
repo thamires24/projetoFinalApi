@@ -9,20 +9,20 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 
 @Entity
 public class Cliente implements UserDetails {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	
 	private String nome;
 	private String email;
 	private String telefone;
@@ -35,8 +35,8 @@ public class Cliente implements UserDetails {
 		return "Usuario [id=" + id + ", nome=" + nome + ", email=" + email + ", senha=" + senha + "]";
 	}
 
-	@OneToMany(mappedBy = "id_cliente", fetch = FetchType.EAGER)
-	private Set<ClientePerfil> clientePerfis = new HashSet<>();
+	@OneToOne(mappedBy = "cliente")
+	private ClientePerfil clientePerfil;
 
 	@ManyToOne
 	@JoinColumn(name = "id_endereco")
@@ -61,8 +61,8 @@ public class Cliente implements UserDetails {
 		this.endereco = endereco;
 	}
 
-	public Set<ClientePerfil> getClientePerfis() {
-		return clientePerfis;
+	public ClientePerfil getClientePerfil() {
+		return clientePerfil;
 	}
 
 	public Long getId() {
@@ -105,17 +105,16 @@ public class Cliente implements UserDetails {
 		this.telefone = telefone;
 	}
 
-	public void setClientePerfis(Set<ClientePerfil> clientePerfis) {
-		this.clientePerfis = clientePerfis;
+	public void setClientePerfil(ClientePerfil clientePerfis) {
+		this.clientePerfil = clientePerfis;
 	}
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
 
-		for (ClientePerfil up : clientePerfis) {
-			grantedAuthorities.add(new SimpleGrantedAuthority(up.getNome()));
-		}
+		
+		grantedAuthorities.add(new SimpleGrantedAuthority(clientePerfil.getNome()));
 		return grantedAuthorities;
 	}
 

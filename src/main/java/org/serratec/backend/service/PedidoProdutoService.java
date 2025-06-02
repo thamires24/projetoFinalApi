@@ -9,6 +9,7 @@ import org.serratec.backend.entity.Pedido;
 import org.serratec.backend.entity.PedidoProduto;
 import org.serratec.backend.repository.PedidoProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,6 +22,7 @@ public class PedidoProdutoService {
     private ClienteService clienteService;
 
     @Autowired
+    @Lazy
     private PedidoService pedidoService;
 
   // Aqui nos consegumos listar os itens dos pedidos, ligar o pedido ao cliente
