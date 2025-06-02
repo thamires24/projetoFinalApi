@@ -77,6 +77,14 @@ public class PedidoProduto {
 	public void setPedido(Pedido pedido) {
 		this.pedido = pedido;
 	}
+
+	public BigDecimal calcularValorTotal() {
+		if (preco == null || quantidadeProduto == null) {
+            return BigDecimal.ZERO;
+        }
+        return preco.multiply(new BigDecimal(quantidadeProduto));
+		
+	}
 	
 	
 }

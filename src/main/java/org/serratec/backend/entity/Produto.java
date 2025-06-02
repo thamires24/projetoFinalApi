@@ -29,6 +29,21 @@ public class Produto {
 	@JoinColumn(name = "id_categoria")
 	private Categoria categoria;
 	
+	
+	
+	
+	public List<PedidoProduto> getPedidoProduto() {
+		return pedidoProduto;
+	}
+	public void setPedidoProduto(List<PedidoProduto> pedidoProduto) {
+		this.pedidoProduto = pedidoProduto;
+	}
+	public Categoria getCategoria() {
+		return categoria;
+	}
+	public void setCategoria(Categoria categoria) {
+		this.categoria = categoria;
+	}
 	public Long getId() {
 		return id;
 	}
