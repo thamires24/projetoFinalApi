@@ -1,5 +1,7 @@
 package org.serratec.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -9,17 +11,18 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "wishlist")
 public class Wishlist {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "id_cliente")
     private Cliente cliente;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "id_produto")
     private Produto produto;

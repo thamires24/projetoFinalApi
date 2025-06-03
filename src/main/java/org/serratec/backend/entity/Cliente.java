@@ -2,18 +2,21 @@ package org.serratec.backend.entity;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 
 @Entity
@@ -22,7 +25,7 @@ public class Cliente implements UserDetails {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	private String nome;
 	private String email;
 	private String telefone;
@@ -35,35 +38,34 @@ public class Cliente implements UserDetails {
 		return "Usuario [id=" + id + ", nome=" + nome + ", email=" + email + ", senha=" + senha + "]";
 	}
 
-	@OneToOne(mappedBy = "cliente")
+	@OneToOne
+	@JoinColumn(name = "id_perfil")
 	private ClientePerfil clientePerfil;
 
 	@OneToOne
 	@JoinColumn(name = "id_endereco")
 	private Endereco endereco;
 
-	public Endereco getEndereco() {
-		return endereco;
-	}
+	@OneToMany(mappedBy = "cliente")
+	@JsonManagedReference
+	private List<Devolucao> devolucoes;
+
 	
 
-	public String getCpf() {
-		return cpf;
+	public void setClientePerfil(ClientePerfil clientePerfis) {
+		this.clientePerfil = clientePerfis;
 	}
 
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
 
-	public void setCpf(String cpf) {
-		this.cpf = cpf;
+		grantedAuthorities.add(new SimpleGrantedAuthority(clientePerfil.getNome()));
+		return grantedAuthorities;
 	}
-
-
-	public void setEndereco(Endereco endereco) {
-		this.endereco = endereco;
-	}
-
-	public ClientePerfil getClientePerfil() {
-		return clientePerfil;
-	}
+	
+	
+	
 
 	public Long getId() {
 		return id;
@@ -89,14 +91,6 @@ public class Cliente implements UserDetails {
 		this.email = email;
 	}
 
-	public String getSenha() {
-		return senha;
-	}
-
-	public void setSenha(String senha) {
-		this.senha = senha;
-	}
-
 	public String getTelefone() {
 		return telefone;
 	}
@@ -105,17 +99,40 @@ public class Cliente implements UserDetails {
 		this.telefone = telefone;
 	}
 
-	public void setClientePerfil(ClientePerfil clientePerfis) {
-		this.clientePerfil = clientePerfis;
+	public String getCpf() {
+		return cpf;
 	}
 
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
+	public void setCpf(String cpf) {
+		this.cpf = cpf;
+	}
 
-		
-		grantedAuthorities.add(new SimpleGrantedAuthority(clientePerfil.getNome()));
-		return grantedAuthorities;
+	public String getSenha() {
+		return senha;
+	}
+
+	public void setSenha(String senha) {
+		this.senha = senha;
+	}
+
+	public Endereco getEndereco() {
+		return endereco;
+	}
+
+	public void setEndereco(Endereco endereco) {
+		this.endereco = endereco;
+	}
+
+	public List<Devolucao> getDevolucoes() {
+		return devolucoes;
+	}
+
+	public void setDevolucoes(List<Devolucao> devolucoes) {
+		this.devolucoes = devolucoes;
+	}
+
+	public ClientePerfil getClientePerfil() {
+		return clientePerfil;
 	}
 
 	@Override
