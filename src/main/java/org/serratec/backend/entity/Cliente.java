@@ -38,7 +38,7 @@ public class Cliente implements UserDetails {
 	@OneToOne(mappedBy = "cliente")
 	private ClientePerfil clientePerfil;
 
-	@ManyToOne
+	@OneToOne
 	@JoinColumn(name = "id_endereco")
 	private Endereco endereco;
 

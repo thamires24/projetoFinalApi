@@ -44,4 +44,9 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
 	}
 
+	@ExceptionHandler(FotoException.class)
+	protected ResponseEntity<Object> handleFotoException(FotoException ex) {
+		return ResponseEntity.badRequest().body(ex.getMessage());
+	}
+
 }

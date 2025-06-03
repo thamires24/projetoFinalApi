@@ -1,14 +1,22 @@
 package org.serratec.backend.service;
 
+import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
+import org.serratec.backend.dto.ProdutoFotoDTO;
 import org.serratec.backend.entity.Categoria;
 import org.serratec.backend.entity.Produto;
+import org.serratec.backend.exception.ProdutoException;
 import org.serratec.backend.repository.CategoriaRepository;
 import org.serratec.backend.repository.ProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class ProdutoService {
@@ -18,6 +26,9 @@ public class ProdutoService {
 
     @Autowired
     private CategoriaRepository categoriaRepository;
+    
+    @Autowired
+    private FotoService fotoService;
 
     public List<Produto> listarTodos() {
         return produtoRepository.findAll();
@@ -69,4 +80,29 @@ public class ProdutoService {
         }
         produtoRepository.deleteById(id);
     }
+    
+    public ProdutoFotoDTO adicionarImagemUri(Produto produto) {
+		URI uri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/produtos/{id}/foto")
+				.buildAndExpand(produto.getId()).toUri();
+
+		ProdutoFotoDTO dto = new ProdutoFotoDTO();
+		dto.setNome(produto.getNomeProduto());
+		dto.setUrl(uri.toString());
+		return dto;
+	}
+
+	public ProdutoFotoDTO buscar(Long id) {
+		Optional<Produto> produto = produtoRepository.findById(id);
+		if (produto.isPresent()) {
+			return adicionarImagemUri(produto.get());
+		}
+		throw new ProdutoException("Produto não encontrado");
+	}
+
+	@Transactional
+	public ProdutoFotoDTO inserir(Produto produto, MultipartFile file) throws IOException {
+		produto = produtoRepository.save(produto);
+		fotoService.inserir(produto, file);
+		return adicionarImagemUri(produto);
+	}
 }
