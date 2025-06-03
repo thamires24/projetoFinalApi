@@ -24,7 +24,7 @@ public class CategoriaController {
 	@Autowired
 	private CategoriaRepository categoriaRepository;
 	
-	//private CategoriaService CategoriaService;
+	// private CategoriaService CategoriaService;
 	
 	@GetMapping("{id}")
 	public ResponseEntity<Categoria> listarPorId(@PathVariable Long id) {
@@ -44,8 +44,9 @@ public class CategoriaController {
 	
 	@PostMapping("/cadastro")
 	@ResponseStatus(HttpStatus.CREATED)
-	public List<Categoria> inserir(@RequestBody List<Categoria> categoria) {
-		return categoriaRepository.saveAll(categoria);
+	public ResponseEntity<List<Categoria>> cadastrar(@RequestBody List<Categoria> categorias) {
+		List<Categoria> salvar = categoriaRepository.saveAll(categorias);
+		return ResponseEntity.status(HttpStatus.CREATED).body(salvar);
 
 	}
 }

@@ -39,6 +39,12 @@ public class ProdutoController {
 	@Autowired
 	private FotoService fotoService;
 	
+	@GetMapping
+	public ResponseEntity <List<Produto>> listarTodos() {
+		List<Produto> produtos = produtoRepository.findAll();
+		return ResponseEntity.ok(produtos);
+	}
+	
 	@GetMapping("{id}")
 	public ResponseEntity<Produto> listarPorId(@PathVariable Long id) {
 		Optional<Produto> produto = produtoRepository.findById(id);

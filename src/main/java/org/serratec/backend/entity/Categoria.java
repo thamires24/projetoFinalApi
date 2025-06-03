@@ -1,7 +1,8 @@
 package org.serratec.backend.entity;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,7 +19,8 @@ public class Categoria {
 	private String nomeCategoria;
 	
 	@OneToMany(mappedBy = "categoria")
-	private Set<Produto> produtos = new HashSet<>();
+	@JsonManagedReference
+	private List<Produto> produtos;
 
 	public Long getId() {
 		return id;
@@ -35,6 +37,15 @@ public class Categoria {
 	public void setNomeCategoria(String nomeCategoria) {
 		this.nomeCategoria = nomeCategoria;
 	}
+
+	public List<Produto> getProdutos() {
+		return produtos;
+	}
+
+	public void setProdutos(List<Produto> produtos) {
+		this.produtos = produtos;
+	}
+
 	
 	
 }
