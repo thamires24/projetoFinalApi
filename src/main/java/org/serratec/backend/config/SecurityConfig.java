@@ -22,7 +22,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @EnableWebSecurity
-@Configuration
+//@Configuration
 public class SecurityConfig {
 	@Autowired
 	private JwtUtil jwtUtil;
@@ -36,13 +36,13 @@ public class SecurityConfig {
 	        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 	        .authorizeHttpRequests(requests -> requests
 	            .requestMatchers("/public/**").permitAll()
-	            //.requestMatchers(HttpMethod.GET,"/funcionarios").permitAll()
+	            //.requestMatchers(HttpMethod.GET,"/clientes").permitAll()
 	            .requestMatchers("/h2-console/**").permitAll()
-	            .requestMatchers(HttpMethod.GET, "/funcionarios/faixa", "/funcionarios/pagina", "/funcionarios/nome")
+	            .requestMatchers(HttpMethod.GET, "/clientes/faixa", "/clientes/pagina", "/clientes/nome")
 	                .hasRole("ADMIN")
-	            .requestMatchers(HttpMethod.GET, "/funcionarios").hasAnyRole("ADMIN", "USER","RH")
-	            .requestMatchers(HttpMethod.GET, "/funcionarios/*/foto").hasAnyRole("ADMIN", "USER","RH")
-	            .requestMatchers(HttpMethod.POST, "/funcionarios").hasAnyRole("ADMIN", "USER","RH")
+	            .requestMatchers(HttpMethod.GET, "/clientes").hasAnyRole("ADMIN", "CLIENTE","RH")
+	            .requestMatchers(HttpMethod.GET, "/clientes/*/foto").hasAnyRole("ADMIN", "CLIENTE","RH")
+	            .requestMatchers(HttpMethod.POST, "/clientes").hasAnyRole("ADMIN", "CLIENTE","RH")
 	            .anyRequest().authenticated()
 	        )
 	        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

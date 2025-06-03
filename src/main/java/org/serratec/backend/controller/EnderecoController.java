@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.serratec.backend.entity.Endereco;
 import org.serratec.backend.repository.EnderecoRepository;
+import org.serratec.backend.service.EnderecoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,13 @@ public class EnderecoController {
 
 	@Autowired
 	private EnderecoRepository enderecoRepository;
-	//private EnderecoService EnderecoService;
+	
+	private EnderecoService enderecoService;
+	
+	@GetMapping()
+	public ResponseEntity <List<Endereco>> listar(){
+	return new ResponseEntity<>(enderecoService.getAllEnderecos(), HttpStatus.OK);
+	}
 	
 	@GetMapping("{id}")
 	public ResponseEntity<Endereco> listarPorId(@PathVariable Long id) {

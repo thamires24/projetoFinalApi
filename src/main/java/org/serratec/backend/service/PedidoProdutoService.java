@@ -24,6 +24,8 @@ public class PedidoProdutoService {
     @Autowired
     @Lazy
     private PedidoService pedidoService;
+    
+    
 
   // Aqui nos consegumos listar os itens dos pedidos, ligar o pedido ao cliente
    // Conseguimos validar o preço do item e a quantidade que tem no peidido 

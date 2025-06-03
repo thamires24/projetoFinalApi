@@ -1,5 +1,6 @@
 package org.serratec.backend.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.serratec.backend.dto.EnderecoResponseDTO;
@@ -15,6 +16,10 @@ import org.springframework.web.client.RestTemplate;
 public class EnderecoService {
 	@Autowired
 	private EnderecoRepository repository;
+	
+	public List<Endereco> getAllEnderecos(){
+		return repository.findAll();
+	}
 
 	public EnderecoResponseDTO buscar(String cep) {
 		var endereco = Optional.ofNullable(repository.findByCep(cep));
@@ -38,4 +43,5 @@ public class EnderecoService {
 	private EnderecoResponseDTO inserir(Endereco endereco) {
 		return new EnderecoResponseDTO(repository.save(endereco));
 	}
+
 }
