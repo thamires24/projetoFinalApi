@@ -15,15 +15,14 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService; 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; 
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-//@Configuration
+@Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
@@ -34,17 +33,17 @@ public class SecurityConfig {
 	@Autowired
 	private UserDetailsService userDetailsService;
 
-	@Autowired
-	private BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	@Bean
-	AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
 			throws Exception {
 		return authenticationConfiguration.getAuthenticationManager();
 	}
 
 	@Bean
-	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		System.out.println("SECURITYCONFIG: Configurando SecurityFilterChain...");
+
 		AuthenticationManager authenticationManager = authenticationManager(
 				http.getSharedObject(AuthenticationConfiguration.class));
 
@@ -54,29 +53,6 @@ public class SecurityConfig {
 						.requestMatchers("/h2-console/**").permitAll()
 
 						.requestMatchers(HttpMethod.POST, "/clientes").permitAll()
-						.requestMatchers(HttpMethod.GET, "/clientes/meus-dados").hasRole("CLIENTE")
-
-						.requestMatchers(HttpMethod.PUT, "/clientes/meus-dados").hasRole("CLIENTE")
-
-						.requestMatchers(HttpMethod.GET, "/produtos/**", "/produtos").permitAll()
-						.requestMatchers(HttpMethod.POST, "/produtos/**").hasRole("ADMIN")
-						.requestMatchers(HttpMethod.PUT, "/produtos/**").hasRole("ADMIN")
-						.requestMatchers(HttpMethod.DELETE, "/produtos/**").hasRole("ADMIN")
-
-						.requestMatchers(HttpMethod.GET, "/categorias/**", "/categorias").permitAll()
-						.requestMatchers(HttpMethod.POST, "/categorias").hasRole("ADMIN")
-						.requestMatchers(HttpMethod.PUT, "/categorias/**").hasRole("ADMIN")
-						.requestMatchers(HttpMethod.DELETE, "/categorias/**").hasRole("ADMIN")
-
-						.requestMatchers(HttpMethod.POST, "/pedidos").hasRole("CLIENTE")
-						.requestMatchers(HttpMethod.GET, "/pedidos/meus-pedidos").hasRole("CLIENTE")
-						.requestMatchers(HttpMethod.GET, "/pedidos/{id}").hasAnyRole("CLIENTE", "ADMIN")
-						.requestMatchers(HttpMethod.PATCH, "/pedidos/{id}/status").hasRole("ADMIN")
-
-						.requestMatchers(HttpMethod.GET, "/enderecos/cep/{cep}").permitAll()
-
-						.requestMatchers("/devolucoes/**").hasRole("CLIENTE").requestMatchers("/wishlist/**")
-						.hasRole("CLIENTE")
 
 						.anyRequest().authenticated())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -36,7 +36,8 @@ public class WishlistController {
 
     @GetMapping("/meus-itens")
     public ResponseEntity<List<WishlistResponseDTO>> listarMeusItens() {
-        return ResponseEntity.ok(wishlistService.listarItensDoClienteAutenticado());
+        List<WishlistResponseDTO> itens = wishlistService.listarItensDoClienteAutenticado();
+        return ResponseEntity.ok(itens);
     }
 
     @PutMapping("/itens/{idWishlistItem}")
