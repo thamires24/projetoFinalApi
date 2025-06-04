@@ -43,12 +43,10 @@ public class CategoriaController {
 	}
 	
 	@PostMapping("/cadastro")
-	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<List<Categoria>> cadastrar(@RequestBody List<Categoria> categorias) {
-		List<Categoria> salvar = categoriaRepository.saveAll(categorias);
-		return ResponseEntity.status(HttpStatus.CREATED).body(salvar);
-
-	}
+    public ResponseEntity<List<Categoria>> criarCategorias(@RequestBody List<Categoria> categorias) {
+        List<Categoria> salvas = categoriaRepository.saveAll(categorias);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvas);
+    }
 }
 
 

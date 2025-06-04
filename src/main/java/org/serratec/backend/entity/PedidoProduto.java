@@ -25,7 +25,6 @@ public class PedidoProduto {
 	@JoinColumn(name = "id_produto")
 	private Produto produto;
 	
-	@JsonBackReference
 	@ManyToOne
 	@JoinColumn(name = "id_pedido")
 	private Pedido pedido;

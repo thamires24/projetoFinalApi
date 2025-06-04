@@ -14,7 +14,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "produto")
 public class Produto {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,12 +28,10 @@ public class Produto {
 	
 	@ManyToOne
 	@JoinColumn(name = "id_categoria")
-	@JsonBackReference
 	private Categoria categoria;
 	
 	@ManyToOne
 	@JoinColumn(name = "id_devolucao")
-	@JsonBackReference
 	private Devolucao devolucao;
 
 	public Long getId() {

@@ -34,7 +34,6 @@ public class Devolucao {
 	
 	
 	@OneToMany(mappedBy = "devolucao")
-	@JsonManagedReference
 	private List<Produto> produtos;
 
 	public Long getId() {
