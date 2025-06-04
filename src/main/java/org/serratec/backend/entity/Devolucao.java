@@ -2,9 +2,7 @@ package org.serratec.backend.entity;
 
 import java.time.LocalDate;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import java.util.Objects;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,25 +14,27 @@ import jakarta.persistence.OneToMany;
 
 @Entity
 public class Devolucao {
-	
-	@Id()
+
+	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	private LocalDate dataSolicitacao;
 	private LocalDate dataEnvioDevolucao;
 	private LocalDate dataRecebimento;
-	
+
 	private String status;
 	private String motivo;
-	
+
 	@ManyToOne
-	@JoinColumn(name = "id_cliente")
+	@JoinColumn
 	private Cliente cliente;
-	
-	
+
 	@OneToMany(mappedBy = "devolucao")
 	private List<Produto> produtos;
+
+	public Devolucao() {
+	}
 
 	public Long getId() {
 		return id;
@@ -92,14 +92,29 @@ public class Devolucao {
 		this.cliente = cliente;
 	}
 
-	public List<Produto> getProduto() {
+	public List<Produto> getProdutos() {
 		return produtos;
 	}
 
-	public void setProduto(List<Produto> produto) {
-		this.produtos = produto;
+	public void setProdutos(List<Produto> produtos) {
+		this.produtos = produtos;
 	}
 
-	
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, cliente, dataSolicitacao);
+	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Devolucao other = (Devolucao) obj;
+		return Objects.equals(id, other.id) && Objects.equals(cliente, other.cliente)
+				&& Objects.equals(dataSolicitacao, other.dataSolicitacao);
+	}
 }

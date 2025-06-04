@@ -1,103 +1,98 @@
 package org.serratec.backend.dto;
 
 import org.hibernate.validator.constraints.br.CPF;
-import org.serratec.backend.entity.Cliente;
-import org.serratec.backend.entity.ClientePerfil;
-
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public class ClienteRequestDTO {
 
-	@NotBlank
-	private String nome;
-	@CPF
-	private String cpf;
-	@Email
-	private String email;
-	@NotBlank
-	private String telefone;
-	
-	@NotBlank
-	private String senha;
+    @NotBlank(message = "Nome não pode ser vazio.")
+    @Size(max = 100, message = "Nome não pode exceder 100 caracteres.")
+    private String nome;
 
-	@Pattern(regexp = "\\d{5}-?d{3}", message = "CEP inválido!")
-	private String cep;
+    @NotBlank(message = "Email não pode ser vazio.")
+    @Email(message = "Email deve ser válido.")
+    @Size(max = 100, message = "Email não pode exceder 100 caracteres.")
+    private String email;
 
-	@NotBlank
-	private ClientePerfil clientePerfil;
+    @NotBlank(message = "CPF não pode ser vazio.")
+    @CPF(message = "CPF inválido.")
+    private String cpf;
 
-	public ClienteRequestDTO() {
-	}
+    @NotBlank(message = "Telefone não pode ser vazio.")
+    @Size(max = 20, message = "Telefone não pode exceder 20 caracteres.")
+    private String telefone;
 
-	public ClienteRequestDTO(Cliente cliente) {
-		this.nome = cliente.getNome();
-		this.cpf = cliente.getCpf();
-		this.email = cliente.getEmail();
-		this.telefone = cliente.getTelefone();
-		this.senha= cliente.getSenha();
-		this.cep = cliente.getEndereco().getCep();
-		this.clientePerfil= cliente.getClientePerfil();
-		
-	}
-	
-	
+    @NotBlank(message = "Senha não pode ser vazia.")
+    @Size(min = 6, message = "Senha deve ter no mínimo 6 caracteres.")
+    private String senha;
 
-	public String getSenha() {
-		return senha;
-	}
+    @NotNull(message = "Endereço é obrigatório.")
+    @Valid
+    private EnderecoRequestDTO endereco;
 
-	public void setSenha(String senha) {
-		this.senha = senha;
-	}
+    private Long idClientePerfil;
 
-	public ClientePerfil getClientePerfil() {
-		return clientePerfil;
-	}
+    public ClienteRequestDTO() {
+    }
 
-	public void setClientePerfil(ClientePerfil clientePerfil) {
-		this.clientePerfil = clientePerfil;
-	}
 
-	public String getNome() {
-		return nome;
-	}
+    public String getNome() {
+        return nome;
+    }
 
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
 
-	public String getEmail() {
-		return email;
-	}
+    public String getEmail() {
+        return email;
+    }
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-	public String getCep() {
-		return cep;
-	}
+    public String getCpf() {
+        return cpf;
+    }
 
-	public void setCep(String cep) {
-		this.cep = cep;
-	}
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
+    }
 
-	public String getCpf() {
-		return cpf;
-	}
+    public String getTelefone() {
+        return telefone;
+    }
 
-	public void setCpf(String cpf) {
-		this.cpf = cpf;
-	}
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
+    }
 
-	public String getTelefone() {
-		return telefone;
-	}
+    public String getSenha() {
+        return senha;
+    }
 
-	public void setTelefone(String telefone) {
-		this.telefone = telefone;
-	}
+    public void setSenha(String senha) {
+        this.senha = senha;
+    }
 
+    public EnderecoRequestDTO getEndereco() {
+        return endereco;
+    }
+
+    public void setEndereco(EnderecoRequestDTO endereco) {
+        this.endereco = endereco;
+    }
+
+    public Long getIdClientePerfil() {
+        return idClientePerfil;
+    }
+
+    public void setIdClientePerfil(Long idClientePerfil) {
+        this.idClientePerfil = idClientePerfil;
+    }
 }

@@ -1,13 +1,14 @@
 package org.serratec.backend.exception;
 
-public class EnumExeption extends RuntimeException {
+public class WishlistException extends RuntimeException {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public EnumExeption(String message) {
+	public WishlistException(String message) {
 		super(message);
 	}
+
 }

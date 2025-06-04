@@ -1,8 +1,7 @@
 package org.serratec.backend.entity;
 
 import java.math.BigDecimal;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.Objects;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,77 +12,105 @@ import jakarta.persistence.ManyToOne;
 
 @Entity
 public class PedidoProduto {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	
-	private Integer quantidadeProduto;
-	private BigDecimal preco;
-	private BigDecimal desconto;
-	
-	@ManyToOne
-	@JoinColumn(name = "id_produto")
-	private Produto produto;
-	
-	@ManyToOne
-	@JoinColumn(name = "id_pedido")
-	private Pedido pedido;
 
-	public Long getId() {
-		return id;
-	}
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    private Integer quantidadeProduto;
+    private BigDecimal precoVenda;
+    private BigDecimal desconto;
 
-	public Integer getQuantidadeProduto() {
-		return quantidadeProduto;
-	}
+    @ManyToOne
+    @JoinColumn
+    private Pedido pedido;
 
-	public void setQuantidadeProduto(Integer quantidadeProduto) {
-		this.quantidadeProduto = quantidadeProduto;
-	}
+    @ManyToOne
+    @JoinColumn
+    private Produto produto;
 
-	public BigDecimal getPreco() {
-		return preco;
-	}
+    public PedidoProduto() {
+    }
 
-	public void setPreco(BigDecimal preco) {
-		this.preco = preco;
-	}
+    public PedidoProduto(Pedido pedido, Produto produto, Integer quantidadeProduto, BigDecimal precoVenda, BigDecimal desconto) {
+        this.pedido = pedido;
+        this.produto = produto;
+        this.quantidadeProduto = quantidadeProduto;
+        this.precoVenda = precoVenda;
+        this.desconto = (desconto != null) ? desconto : BigDecimal.ZERO;
+    }
 
-	public BigDecimal getDesconto() {
-		return desconto;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setDesconto(BigDecimal desconto) {
-		this.desconto = desconto;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public Produto getProduto() {
-		return produto;
-	}
+    public Integer getQuantidadeProduto() {
+        return quantidadeProduto;
+    }
 
-	public void setProduto(Produto produto) {
-		this.produto = produto;
-	}
+    public void setQuantidadeProduto(Integer quantidadeProduto) {
+        this.quantidadeProduto = quantidadeProduto;
+    }
 
-	public Pedido getPedido() {
-		return pedido;
-	}
+    public BigDecimal getPrecoVenda() {
+        return precoVenda;
+    }
 
-	public void setPedido(Pedido pedido) {
-		this.pedido = pedido;
-	}
+    public void setPrecoVenda(BigDecimal precoVenda) {
+        this.precoVenda = precoVenda;
+    }
 
-	public BigDecimal calcularValorTotal() {
-		if (preco == null || quantidadeProduto == null) {
+    public BigDecimal getDesconto() {
+        return desconto;
+    }
+
+    public void setDesconto(BigDecimal desconto) {
+        this.desconto = (desconto != null) ? desconto : BigDecimal.ZERO;
+    }
+
+    public Pedido getPedido() {
+        return pedido;
+    }
+
+    public void setPedido(Pedido pedido) {
+        this.pedido = pedido;
+    }
+
+    public Produto getProduto() {
+        return produto;
+    }
+
+    public void setProduto(Produto produto) {
+        this.produto = produto;
+    }
+
+    public BigDecimal calcularSubtotal() {
+        if (precoVenda == null || quantidadeProduto == null) {
             return BigDecimal.ZERO;
         }
-        return preco.multiply(new BigDecimal(quantidadeProduto));
-		
-	}
-	
-	
+        BigDecimal precoComDesconto = precoVenda.subtract(getDesconto());
+        return precoComDesconto.multiply(new BigDecimal(quantidadeProduto));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, pedido, produto);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        PedidoProduto other = (PedidoProduto) obj;
+        return Objects.equals(id, other.id) && Objects.equals(pedido, other.pedido)
+                && Objects.equals(produto, other.produto);
+    }
 }

@@ -24,12 +24,7 @@ public class PedidoProdutoController {
 
 	@Autowired
 	private PedidoProdutoRepository pedidoProdutoRepository;
-	//private PedidoProdutoService PedidoProdutoService;
 	
-//	@GetMapping()
-//	public ResponseEntity<PedidoProduto> listar(){
-//		return new ResponseEntity<>(pedidoProdutoService.getAllPedidoProdutos(),HttpStatus.OK);
-//	}
 	
 	@GetMapping("{id}")
 	public ResponseEntity<PedidoProduto> listarPorId(@PathVariable Long id) {

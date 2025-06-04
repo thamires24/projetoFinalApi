@@ -1,26 +1,25 @@
 package org.serratec.backend.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import org.serratec.backend.entity.Endereco;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 public class EnderecoRequestDTO {
-    @NotBlank
-    private String cep;
-    private String rua;
-    private String bairro;
-    private String cidade;
-    private String uf;
 
-    public EnderecoRequestDTO() {
-    }
+	@NotBlank(message = "CEP não pode ser vazio.")
+	@Pattern(regexp = "^\\d{8}$", message = "CEP deve conter 8 dígitos numéricos.")
+	private String cep;
 
-    public EnderecoRequestDTO(Endereco endereco) {
-        this.cep = endereco.getCep();
-        this.rua = endereco.getRua();
-        this.bairro = endereco.getBairro();
-        this.cidade = endereco.getCidade();
-        this.uf = endereco.getUf();
-    }
+
+	@NotBlank(message = "Número não pode ser vazio.")
+	@Size(max = 20, message = "Número não pode exceder 20 caracteres.")
+	private String numero;
+
+	@Size(max = 100, message = "Complemento não pode exceder 100 caracteres.")
+	private String complemento;
+
+	public EnderecoRequestDTO() {
+	}
 
 	public String getCep() {
 		return cep;
@@ -30,36 +29,19 @@ public class EnderecoRequestDTO {
 		this.cep = cep;
 	}
 
-	public String getRua() {
-		return rua;
+	public String getNumero() {
+		return numero;
 	}
 
-	public void setRua(String rua) {
-		this.rua = rua;
+	public void setNumero(String numero) {
+		this.numero = numero;
 	}
 
-	public String getBairro() {
-		return bairro;
+	public String getComplemento() {
+		return complemento;
 	}
 
-	public void setBairro(String bairro) {
-		this.bairro = bairro;
+	public void setComplemento(String complemento) {
+		this.complemento = complemento;
 	}
-
-	public String getCidade() {
-		return cidade;
-	}
-
-	public void setCidade(String cidade) {
-		this.cidade = cidade;
-	}
-
-	public String getUf() {
-		return uf;
-	}
-
-	public void setUf(String uf) {
-		this.uf = uf;
-	} 
-    
 }

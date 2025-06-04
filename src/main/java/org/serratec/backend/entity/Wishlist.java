@@ -1,6 +1,6 @@
 package org.serratec.backend.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.Objects;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,7 +8,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 
 @Entity
 public class Wishlist {
@@ -18,15 +17,23 @@ public class Wishlist {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "id_cliente")
+    @JoinColumn
     private Cliente cliente;
 
     @ManyToOne
-    @JoinColumn(name = "id_produto")
+    @JoinColumn
     private Produto produto;
 
     private Integer quantidadeDesejada;
 
+    public Wishlist() {
+    }
+
+    public Wishlist(Cliente cliente, Produto produto, Integer quantidadeDesejada) {
+        this.cliente = cliente;
+        this.produto = produto;
+        this.quantidadeDesejada = (quantidadeDesejada != null && quantidadeDesejada > 0) ? quantidadeDesejada : 1;
+    }
 
     public Long getId() {
         return id;
@@ -57,6 +64,24 @@ public class Wishlist {
     }
 
     public void setQuantidadeDesejada(Integer quantidadeDesejada) {
-        this.quantidadeDesejada = quantidadeDesejada;
+        this.quantidadeDesejada = (quantidadeDesejada != null && quantidadeDesejada > 0) ? quantidadeDesejada : 1;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, cliente, produto);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Wishlist other = (Wishlist) obj;
+        return Objects.equals(id, other.id) && Objects.equals(cliente, other.cliente)
+                && Objects.equals(produto, other.produto);
     }
 }

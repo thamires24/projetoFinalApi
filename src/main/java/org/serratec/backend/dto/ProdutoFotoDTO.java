@@ -2,32 +2,30 @@ package org.serratec.backend.dto;
 
 public class ProdutoFotoDTO {
 
-	private String nome;
-	private String url;
+    private String nomeProduto;
+    private String url;
 
-	public ProdutoFotoDTO() {
-		// TODO Auto-generated constructor stub
-	}
+    public ProdutoFotoDTO() {
+    }
 
-	public ProdutoFotoDTO(String nome, String url) {
-		this.nome = nome;
-		this.url = url;
-	}
+    public ProdutoFotoDTO(String nomeProduto, String url) {
+        this.nomeProduto = nomeProduto;
+        this.url = url;
+    }
 
-	public String getNome() {
-		return nome;
-	}
+    public String getNomeProduto() {
+        return nomeProduto;
+    }
 
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
+    public void setNomeProduto(String nomeProduto) {
+        this.nomeProduto = nomeProduto;
+    }
 
-	public String getUrl() {
-		return url;
-	}
+    public String getUrl() {
+        return url;
+    }
 
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
+    public void setUrl(String url) {
+        this.url = url;
+    }
 }

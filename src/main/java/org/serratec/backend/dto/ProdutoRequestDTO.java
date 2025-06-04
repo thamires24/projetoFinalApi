@@ -1,26 +1,28 @@
 package org.serratec.backend.dto;
 
-import org.serratec.backend.entity.Produto;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+import java.math.BigDecimal;
 
 public class ProdutoRequestDTO {
-	
-	@NotBlank
+
+	@NotBlank(message = "Nome do produto não pode ser vazio.")
+	@Size(max = 100, message = "Nome do produto não pode exceder 100 caracteres.")
 	private String nomeProduto;
-	@NotBlank
+
+	@Size(max = 255, message = "Descrição não pode exceder 255 caracteres.")
 	private String descricao;
-	@NotNull
-	private Double preco;
-	
+
+	@NotNull(message = "Preço não pode ser nulo.")
+	@Positive(message = "Preço deve ser positivo.")
+	private BigDecimal preco;
+
+	@NotNull(message = "ID da categoria é obrigatório.")
+	private Long idCategoria;
+
 	public ProdutoRequestDTO() {
-	}
-	
-	public ProdutoRequestDTO(Produto produto) {
-		this.nomeProduto = produto.getNomeProduto();
-		this.descricao = produto.getDescricao();
-		this.preco = produto.getPreco();
 	}
 
 	public String getNomeProduto() {
@@ -39,14 +41,19 @@ public class ProdutoRequestDTO {
 		this.descricao = descricao;
 	}
 
-	public Double getPreco() {
+	public BigDecimal getPreco() {
 		return preco;
 	}
 
-	public void setPreco(Double preco) {
+	public void setPreco(BigDecimal preco) {
 		this.preco = preco;
 	}
-	
-	
 
+	public Long getIdCategoria() {
+		return idCategoria;
+	}
+
+	public void setIdCategoria(Long idCategoria) {
+		this.idCategoria = idCategoria;
+	}
 }
