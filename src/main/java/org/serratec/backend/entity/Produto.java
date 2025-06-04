@@ -3,7 +3,7 @@ package org.serratec.backend.entity;
 import java.util.List;
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonBackReference; 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -14,8 +14,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name = "produto")
 public class Produto {
 
 	@Id
@@ -27,7 +29,7 @@ public class Produto {
 	private Double preco;
 
 	@ManyToOne
-	@JoinColumn
+	@JoinColumn(name = "id_categoria")
 	@JsonBackReference
 	private Categoria categoria;
 
@@ -106,6 +108,11 @@ public class Produto {
 
 	public void setDevolucao(Devolucao devolucao) {
 		this.devolucao = devolucao;
+	}
+
+	
+	public Double getValorUnitario() {
+		return this.preco;
 	}
 
 	@Override
