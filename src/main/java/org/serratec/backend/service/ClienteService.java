@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.serratec.backend.config.MailConfig;
+import org.serratec.backend.dto.ClienteRequestDTO;
 import org.serratec.backend.entity.Cliente;
 import org.serratec.backend.repository.ClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,14 +39,19 @@ public class ClienteService {
     }
 
    // serve para cadastrar um cliente novo
-    public Cliente salvar(Cliente cliente) throws Exception {
-        if (cliente.getCpf() == null || cliente.getCpf().isEmpty()) {
+    public Cliente salvar(ClienteRequestDTO dto) throws Exception {
+        if (dto.getCpf() == null || dto.getCpf().isEmpty()) {
             throw new Exception("CPF é obrigatório.");
         }
-        Optional<Cliente> clienteExistente = clienteRepository.findByCpf(cliente.getCpf());
+        Optional<Cliente> clienteExistente = clienteRepository.findByCpf(dto.getCpf());
         if (clienteExistente.isPresent()) {
             throw new Exception("CPF já cadastrado.");
         }
+        Cliente cliente = new Cliente();
+        cliente.setNome(dto.getNome());
+        cliente.setCpf(dto.getCpf());
+        cliente.setEmail(dto.getEmail());
+        cliente.setTelefone(dto.getTelefone());
         return clienteRepository.save(cliente);
     }
 

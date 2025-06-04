@@ -2,21 +2,18 @@ package org.serratec.backend.entity;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 
 @Entity
@@ -30,7 +27,6 @@ public class Cliente implements UserDetails {
 	private String email;
 	private String telefone;
 	private String cpf;
-
 	private String senha;
 
 	@Override
@@ -46,9 +42,8 @@ public class Cliente implements UserDetails {
 	@JoinColumn(name = "id_endereco")
 	private Endereco endereco;
 
-	@OneToMany(mappedBy = "cliente")
-	@JsonManagedReference
-	private List<Devolucao> devolucoes;
+//	@OneToMany(mappedBy = "cliente")
+//	private List<Devolucao> devolucoes;
 
 	
 
@@ -123,13 +118,15 @@ public class Cliente implements UserDetails {
 		this.endereco = endereco;
 	}
 
-	public List<Devolucao> getDevolucoes() {
-		return devolucoes;
-	}
-
-	public void setDevolucoes(List<Devolucao> devolucoes) {
-		this.devolucoes = devolucoes;
-	}
+//	public List<Devolucao> getDevolucoes() {
+//		return devolucoes;
+//	}
+//
+//	public void setDevolucoes(List<Devolucao> devolucoes) {
+//		this.devolucoes = devolucoes;
+//	}
+	
+	
 
 	public ClientePerfil getClientePerfil() {
 		return clientePerfil;

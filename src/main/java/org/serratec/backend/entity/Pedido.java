@@ -30,12 +30,10 @@ public class Pedido {
 	@Enumerated(EnumType.STRING)
 	private StatusPedidoEnum statusPedidoEnum;
 	
-	@JsonBackReference
 	@ManyToOne
 	@JoinColumn(name = "id_cliente")
 	private Cliente cliente;
 	
-	@JsonManagedReference
 	@OneToMany(mappedBy = "pedido")
 	private List<PedidoProduto> pedidoProduto;
 	

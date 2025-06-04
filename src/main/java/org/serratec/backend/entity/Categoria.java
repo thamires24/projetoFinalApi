@@ -19,7 +19,6 @@ public class Categoria {
 	private String nomeCategoria;
 	
 	@OneToMany(mappedBy = "categoria")
-	@JsonManagedReference
 	private List<Produto> produtos;
 
 	public Long getId() {

@@ -3,8 +3,11 @@ package org.serratec.backend.controller;
 import java.util.List;
 import java.util.Optional;
 
+import org.serratec.backend.dto.ClienteRequestDTO;
+import org.serratec.backend.dto.ClienteResponseDTO;
 import org.serratec.backend.entity.Cliente;
 import org.serratec.backend.repository.ClienteRepository;
+import org.serratec.backend.service.ClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,12 +27,18 @@ public class ClienteController {
 	
 	@Autowired
 	private ClienteRepository clienteRepository;
-	//private ClienteService ClienteService;
+	@Autowired
+	private ClienteService clienteService;
 	
-	@GetMapping("{id}")
-	public ResponseEntity<Cliente> listarPorId(@PathVariable Long id) {
-		Optional<Cliente> cliente = clienteRepository.findById(id);
-		return ResponseEntity.ok(cliente.get());
+	
+	@GetMapping("/{id}")
+	public ResponseEntity<ClienteResponseDTO> listarPorId(@PathVariable Long id) {
+	    Optional<Cliente> clienteOpt = clienteRepository.findById(id);
+	    if (clienteOpt.isEmpty()) {
+	        return ResponseEntity.notFound().build();
+	    }
+	    Cliente cliente = clienteOpt.get();
+	    return ResponseEntity.ok(new ClienteResponseDTO(cliente.getId(), cliente.getNome(), cliente.getEmail()));
 	}
 	
 	@PutMapping("/atualizar")
@@ -50,6 +59,13 @@ public class ClienteController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public List<Cliente> inserir(@RequestBody List<Cliente> cliente) {
 		return clienteRepository.saveAll(cliente);
+
+	}
+	
+	@PostMapping
+	@ResponseStatus(HttpStatus.CREATED)
+	public Cliente inserir(@RequestBody ClienteRequestDTO cliente) throws Exception {
+		return clienteService.salvar(cliente);
 
 	}
 }
