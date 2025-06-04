@@ -2,11 +2,23 @@ package org.serratec.backend.controller;
 
 import java.util.List;
 
-import org.serratec.backend.entity.Wishlist;
+import org.serratec.backend.dto.WishlistRequestDTO;
+import org.serratec.backend.dto.WishlistResponseDTO;
 import org.serratec.backend.service.WishlistService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/wishlist")
@@ -15,48 +27,29 @@ public class WishlistController {
     @Autowired
     private WishlistService wishlistService;
 
-    @GetMapping("/cliente/{clienteId}")
-    public ResponseEntity<List<Wishlist>> listarPorCliente(@PathVariable Long clienteId) {
-        try {
-            List<Wishlist> lista = wishlistService.listarPorCliente(clienteId);
-            return ResponseEntity.ok(lista);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+    @PostMapping("/itens")
+    public ResponseEntity<WishlistResponseDTO> adicionarItem(
+            @Valid @RequestBody WishlistRequestDTO requestDTO) {
+        WishlistResponseDTO itemAdicionado = wishlistService.adicionarItem(requestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(itemAdicionado);
     }
 
-    @PostMapping("/cliente/{clienteId}/produto/{produtoId}")
-    public ResponseEntity<Wishlist> adicionarItem(
-            @PathVariable Long clienteId,
-            @PathVariable Long produtoId,
-            @RequestParam(required = false) Integer quantidadeDesejada) {
-        try {
-            Wishlist wishlist = wishlistService.adicionarItem(clienteId, produtoId, quantidadeDesejada);
-            return ResponseEntity.ok(wishlist);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+    @GetMapping("/meus-itens")
+    public ResponseEntity<List<WishlistResponseDTO>> listarMeusItens() {
+        return ResponseEntity.ok(wishlistService.listarItensDoClienteAutenticado());
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Wishlist> atualizarItem(
-            @PathVariable Long id,
-            @RequestParam Integer quantidadeDesejada) {
-        try {
-            Wishlist wishlist = wishlistService.atualizarItem(id, quantidadeDesejada);
-            return ResponseEntity.ok(wishlist);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+    @PutMapping("/itens/{idWishlistItem}")
+    public ResponseEntity<WishlistResponseDTO> atualizarItem(
+            @PathVariable Long idWishlistItem,
+            @RequestParam Integer novaQuantidadeDesejada) {
+        WishlistResponseDTO itemAtualizado = wishlistService.atualizarItem(idWishlistItem, novaQuantidadeDesejada);
+        return ResponseEntity.ok(itemAtualizado);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removerItem(@PathVariable Long id) {
-        try {
-            wishlistService.removerItem(id);
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+    @DeleteMapping("/itens/{idWishlistItem}")
+    public ResponseEntity<Void> removerItem(@PathVariable Long idWishlistItem) {
+        wishlistService.removerItem(idWishlistItem);
+        return ResponseEntity.noContent().build();
     }
 }

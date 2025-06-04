@@ -1,47 +1,76 @@
 package org.serratec.backend.service;
 
-import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.serratec.backend.dto.EnderecoResponseDTO;
 import org.serratec.backend.entity.Endereco;
+import org.serratec.backend.exception.EnderecoException;
 import org.serratec.backend.repository.EnderecoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @Service
 public class EnderecoService {
-	@Autowired
-	private EnderecoRepository repository;
-	
-	public List<Endereco> getAllEnderecos(){
-		return repository.findAll();
-	}
 
-	public EnderecoResponseDTO buscar(String cep) {
-		var endereco = Optional.ofNullable(repository.findByCep(cep));
+    @Autowired
+    private EnderecoRepository enderecoRepository;
 
-		if (endereco.isPresent()) {
-			return new EnderecoResponseDTO(endereco.get());
-		} else {
-			RestTemplate rs = new RestTemplate();
-			String url = "https://viacep.com.br/ws/" + cep + "/json/";
-			Optional<Endereco> enderecoViaCep = Optional.ofNullable(rs.getForObject(url, Endereco.class));
+    private final RestTemplate restTemplate = new RestTemplate();
 
-			if (enderecoViaCep.isPresent()) {
-				String cepSemTraco = enderecoViaCep.get().getCep().replaceAll("-", "");
-				enderecoViaCep.get().setCep(cepSemTraco);
-				return inserir(enderecoViaCep.get());
-			}
-		}
-		throw new HttpClientErrorException(HttpStatus.NOT_FOUND);
-	}
+    @Transactional
+    public Endereco obterOuCriarEnderecoPorCep(String cepOriginal, String numero, String complemento) throws EnderecoException {
+        String cepTratado = cepOriginal.replaceAll("[^0-9]", "");
+        if (cepTratado.length() != 8) {
+            throw new EnderecoException("Formato de CEP inválido: " + cepOriginal + ". Deve conter 8 dígitos.");
+        }
 
-	private EnderecoResponseDTO inserir(Endereco endereco) {
-		return new EnderecoResponseDTO(repository.save(endereco));
-	}
+        Optional<Endereco> enderecoExistente = Optional.ofNullable(enderecoRepository.findByCep(cepTratado));
+        
+        if (enderecoExistente.isPresent() &&
+            Objects.equals(enderecoExistente.get().getNumero(), numero) &&
+            Objects.equals(enderecoExistente.get().getComplemento(), complemento)) {
+            return enderecoExistente.get();
+        }
 
+        String url = "https://viacep.com.br/ws/" + cepTratado + "/json/";
+        Endereco enderecoViaCep;
+        try {
+            enderecoViaCep = restTemplate.getForObject(url, Endereco.class);
+        } catch (HttpClientErrorException e) {
+            throw new EnderecoException("CEP " + cepTratado + " não encontrado no serviço ViaCEP. Status: " + e.getStatusCode());
+        } catch (RestClientException e) {
+            throw new EnderecoException("Erro ao comunicar com o serviço ViaCEP: " + e.getMessage());
+        }
+
+        if (enderecoViaCep == null || enderecoViaCep.getCep() == null) {
+            throw new EnderecoException("CEP " + cepTratado + " não encontrado (ViaCEP retornou dados inválidos ou erro).");
+        }
+        
+        enderecoViaCep.setCep(enderecoViaCep.getCep().replaceAll("-", ""));
+        
+        enderecoViaCep.setNumero(numero);
+        enderecoViaCep.setComplemento(complemento);
+        enderecoViaCep.setId(null);
+
+        return enderecoRepository.save(enderecoViaCep);
+    }
+
+
+    @Transactional(readOnly = true)
+    public EnderecoResponseDTO buscarDtoPorCep(String cep) throws EnderecoException {
+        String cepTratado = cep.replaceAll("[^0-9]", "");
+         if (cepTratado.length() != 8) {
+            throw new EnderecoException("Formato de CEP inválido: " + cep + ". Deve conter 8 dígitos.");
+        }
+        Endereco endereco = enderecoRepository.findByCep(cepTratado);
+        if (endereco == null) {
+            throw new EnderecoException("Endereço não encontrado para o CEP: " + cepTratado);
+        }
+        return new EnderecoResponseDTO(endereco);
+    }
 }

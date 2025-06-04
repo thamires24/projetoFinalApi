@@ -15,29 +15,33 @@ import io.swagger.v3.oas.models.servers.Server;
 @Configuration
 public class OpenApiConfig {
 
-	@Value("${dominio.openapi.dev-url}")
+	@Value("${api.openapi.dev-url:http://localhost:8080}") 
 	private String devUrl;
-	@Value("${dominio.openapi.prod-url}")
+
+	@Value("${api.openapi.prod-url:https://sua-api-em-producao.com}")
 	private String prodUrl;
 
 	@Bean
-	OpenAPI myOpenAPI() {
+	public OpenAPI myOpenAPI() {
 		Server devServer = new Server();
 		devServer.setUrl(devUrl);
-		devServer.setDescription("URL do servidor de desenvolvimento");
+		devServer.setDescription("Servidor de Desenvolvimento");
+
 		Server prodServer = new Server();
 		prodServer.setUrl(prodUrl);
-		prodServer.setDescription("URL do servidor de produção");
+		prodServer.setDescription("Servidor de Produção");
+
 		Contact contact = new Contact();
-		contact.setEmail("contato@meudominio.com.br");
-		contact.setName("Fulano");
-		contact.setUrl("https://www.meudominio.com.br");
-		License apacheLicense = new License().name("Apache 	License")
-				.url("https://www.apache.org/licenses/LICENSE-2.0");
-		Info info = new Info().title("API de Teste").version("1.0").contact(contact)
-				.description("API para testes diversos").termsOfService("https://www.meudominio.com.br/termos")
-				.license(apacheLicense);
+		contact.setEmail("seuemail@exemplo.com");
+		contact.setName("Nome do Contato ou Empresa");
+		contact.setUrl("https://seusite.com");
+
+		License mitLicense = new License().name("MIT License").url("https://choosealicense.com/licenses/mit/");
+
+		Info info = new Info().title("API E-Commerce - Projeto Final").version("1.0")
+				.description("Esta API gerencia as operações de um sistema de E-Commerce.").contact(contact)
+				.license(mitLicense).termsOfService("https://seusite.com/termos");
+
 		return new OpenAPI().info(info).servers(List.of(devServer, prodServer));
 	}
-
 }

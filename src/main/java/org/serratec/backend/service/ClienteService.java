@@ -1,90 +1,163 @@
 package org.serratec.backend.service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.serratec.backend.config.MailConfig;
 import org.serratec.backend.dto.ClienteRequestDTO;
+import org.serratec.backend.dto.ClienteResponseDTO;
+import org.serratec.backend.dto.EnderecoRequestDTO;
 import org.serratec.backend.entity.Cliente;
+import org.serratec.backend.entity.ClientePerfil;
+import org.serratec.backend.entity.Endereco;
+import org.serratec.backend.exception.ClienteException;
+import org.serratec.backend.exception.EnderecoException;
+import org.serratec.backend.repository.ClientePerfilRepository;
 import org.serratec.backend.repository.ClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ClienteService {
 
-    @Autowired
-    private ClienteRepository clienteRepository;
-    
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+	@Autowired
+	private ClienteRepository clienteRepository;
 
-    @Autowired
-    private MailConfig mailConfig;
+	@Autowired
+	private EnderecoService enderecoService;
 
-    //Lista os clientes
-    public List<Cliente> listarTodos() {
-        return clienteRepository.findAll();
-    }
+	@Autowired
+	private ClientePerfilRepository clientePerfilRepository;
 
-  // essa serve para encontrar cliente pelo ID
-    public Optional<Cliente> buscarPorId(Long id) {
-        return clienteRepository.findById(id);
-    }
+	@Autowired
+	private BCryptPasswordEncoder passwordEncoder;
 
-  // encontra os clientes pelo CPF
-    public Optional<Cliente> buscarPorCpf(String cpf) {
-        return clienteRepository.findByCpf(cpf);
-    }
+	@Autowired
+	private MailConfig mailConfig;
 
-   // serve para cadastrar um cliente novo
-    public Cliente salvar(ClienteRequestDTO dto) throws Exception {
-        if (dto.getCpf() == null || dto.getCpf().isEmpty()) {
-            throw new Exception("CPF é obrigatório.");
-        }
-        Optional<Cliente> clienteExistente = clienteRepository.findByCpf(dto.getCpf());
-        if (clienteExistente.isPresent()) {
-            throw new Exception("CPF já cadastrado.");
-        }
-        Cliente cliente = new Cliente();
-        cliente.setNome(dto.getNome());
-        cliente.setCpf(dto.getCpf());
-        cliente.setEmail(dto.getEmail());
-        cliente.setTelefone(dto.getTelefone());
-        return clienteRepository.save(cliente);
-    }
+	private static final Long ID_PERFIL_CLIENTE_PADRAO = 1L;
 
-    public Cliente atualizar(Long id, Cliente clienteAtualizado) throws Exception {
-        Optional<Cliente> clienteExistente = clienteRepository.findById(id);
-        if (!clienteExistente.isPresent()) {
-            throw new Exception("Cliente não encontrado com id: " + id);
-        }
-        Cliente cliente = clienteExistente.get();
+	@Transactional(readOnly = true)
+	public List<ClienteResponseDTO> listarTodos() {
+		return clienteRepository.findAll().stream().map(ClienteResponseDTO::new).collect(Collectors.toList());
+	}
 
-     
-        if (!cliente.getCpf().equals(clienteAtualizado.getCpf())) {
-            Optional<Cliente> clienteComCpf = clienteRepository.findByCpf(clienteAtualizado.getCpf());
-            if (clienteComCpf.isPresent() && !clienteComCpf.get().getId().equals(id)) {
-                throw new Exception("CPF já cadastrado para outro cliente.");
-            }
-        }
+	@Transactional(readOnly = true)
+	public ClienteResponseDTO buscarPorId(Long id) throws ClienteException {
+		Cliente cliente = clienteRepository.findById(id)
+				.orElseThrow(() -> new ClienteException("Cliente com ID " + id + " não encontrado."));
+		return new ClienteResponseDTO(cliente);
+	}
 
-        cliente.setNome(clienteAtualizado.getNome());
-        cliente.setCpf(clienteAtualizado.getCpf());
-        cliente.setEmail(clienteAtualizado.getEmail());
-        cliente.setTelefone(clienteAtualizado.getTelefone());
-        cliente.setEndereco(clienteAtualizado.getEndereco());
+	@Transactional
+	public ClienteResponseDTO salvar(ClienteRequestDTO clienteRequestDTO) throws ClienteException, EnderecoException {
+		if (clienteRepository.findByCpf(clienteRequestDTO.getCpf()).isPresent()) {
+			throw new ClienteException("CPF " + clienteRequestDTO.getCpf() + " já cadastrado.");
+		}
+		if (clienteRepository.findByEmail(clienteRequestDTO.getEmail()).isPresent()) {
+			throw new ClienteException("Email " + clienteRequestDTO.getEmail() + " já cadastrado.");
+		}
 
-        return clienteRepository.save(cliente);
-    }
+		Cliente cliente = new Cliente();
+		cliente.setNome(clienteRequestDTO.getNome());
+		cliente.setEmail(clienteRequestDTO.getEmail());
+		cliente.setCpf(clienteRequestDTO.getCpf());
+		cliente.setTelefone(clienteRequestDTO.getTelefone());
+		cliente.setSenha(passwordEncoder.encode(clienteRequestDTO.getSenha()));
 
-  // serve para deletar o cliente
-    public void deletar(Long id) throws Exception {
-        Optional<Cliente> clienteExistente = clienteRepository.findById(id);
-        if (!clienteExistente.isPresent()) {
-            throw new Exception("Cliente não encontrado com id: " + id);
-        }
-        clienteRepository.deleteById(id);
-    }
+		EnderecoRequestDTO enderecoDto = clienteRequestDTO.getEndereco();
+		if (enderecoDto != null) {
+			Endereco endereco = enderecoService.obterOuCriarEnderecoPorCep(enderecoDto.getCep(),
+					enderecoDto.getNumero(), enderecoDto.getComplemento());
+			cliente.setEndereco(endereco);
+		} else {
+			throw new ClienteException("Dados de endereço são obrigatórios para o cadastro.");
+		}
+
+		Long idPerfil = clienteRequestDTO.getIdClientePerfil() != null ? clienteRequestDTO.getIdClientePerfil()
+				: ID_PERFIL_CLIENTE_PADRAO;
+		ClientePerfil perfil = clientePerfilRepository.findById(idPerfil)
+				.orElseThrow(() -> new ClienteException("Perfil de cliente com ID " + idPerfil + " não encontrado."));
+		cliente.setClientePerfil(perfil);
+
+		Cliente clienteSalvo = clienteRepository.save(cliente);
+
+		try {
+			String mensagemEmail = "Olá " + clienteSalvo.getNome()
+					+ ",\n\nSeu cadastro foi realizado com sucesso em nossa plataforma!\n\n" + "Login: "
+					+ clienteSalvo.getEmail() + "\n\nAtenciosamente,\nEquipe ECommerce";
+			mailConfig.enviarEmail(clienteSalvo.getEmail(), "Cadastro Realizado - ECommerce", mensagemEmail);
+		} catch (Exception e) {
+			System.err.println("Erro ao enviar email de confirmação de cadastro: " + e.getMessage());
+		}
+
+		return new ClienteResponseDTO(clienteSalvo);
+	}
+
+	@Transactional
+	public ClienteResponseDTO atualizar(Long id, ClienteRequestDTO clienteRequestDTO)
+			throws ClienteException, EnderecoException {
+		Cliente clienteExistente = clienteRepository.findById(id)
+				.orElseThrow(() -> new ClienteException("Cliente com ID " + id + " não encontrado para atualização."));
+
+		if (!clienteExistente.getCpf().equals(clienteRequestDTO.getCpf())) {
+			if (clienteRepository.findByCpf(clienteRequestDTO.getCpf()).filter(c -> !c.getId().equals(id))
+					.isPresent()) {
+				throw new ClienteException("CPF " + clienteRequestDTO.getCpf() + " já cadastrado para outro cliente.");
+			}
+		}
+		if (!clienteExistente.getEmail().equals(clienteRequestDTO.getEmail())) {
+			if (clienteRepository.findByEmail(clienteRequestDTO.getEmail()).filter(c -> !c.getId().equals(id))
+					.isPresent()) {
+				throw new ClienteException(
+						"Email " + clienteRequestDTO.getEmail() + " já cadastrado para outro cliente.");
+			}
+		}
+
+		clienteExistente.setNome(clienteRequestDTO.getNome());
+		clienteExistente.setEmail(clienteRequestDTO.getEmail());
+		clienteExistente.setCpf(clienteRequestDTO.getCpf());
+		clienteExistente.setTelefone(clienteRequestDTO.getTelefone());
+
+		if (clienteRequestDTO.getSenha() != null && !clienteRequestDTO.getSenha().isBlank()) {
+			clienteExistente.setSenha(passwordEncoder.encode(clienteRequestDTO.getSenha()));
+		}
+
+		EnderecoRequestDTO enderecoDto = clienteRequestDTO.getEndereco();
+		if (enderecoDto != null) {
+			Endereco endereco = enderecoService.obterOuCriarEnderecoPorCep(enderecoDto.getCep(),
+					enderecoDto.getNumero(), enderecoDto.getComplemento());
+			clienteExistente.setEndereco(endereco);
+		}
+
+		if (clienteRequestDTO.getIdClientePerfil() != null && (clienteExistente.getClientePerfil() == null
+				|| !clienteExistente.getClientePerfil().getId().equals(clienteRequestDTO.getIdClientePerfil()))) {
+			ClientePerfil novoPerfil = clientePerfilRepository.findById(clienteRequestDTO.getIdClientePerfil())
+					.orElseThrow(() -> new ClienteException(
+							"Perfil de cliente com ID " + clienteRequestDTO.getIdClientePerfil() + " não encontrado."));
+			clienteExistente.setClientePerfil(novoPerfil);
+		}
+
+		Cliente clienteAtualizado = clienteRepository.save(clienteExistente);
+
+		try {
+			String mensagemEmail = "Olá " + clienteAtualizado.getNome()
+					+ ",\n\nSeus dados cadastrais foram atualizados em nossa plataforma.\n\n"
+					+ "Atenciosamente,\nEquipe ECommerce";
+			mailConfig.enviarEmail(clienteAtualizado.getEmail(), "Dados Cadastrais Atualizados - ECommerce", mensagemEmail);
+		} catch (Exception e) {
+			System.err.println("Erro ao enviar email de confirmação de atualização: " + e.getMessage());
+		}
+		return new ClienteResponseDTO(clienteAtualizado);
+	}
+
+	@Transactional
+	public void deletar(Long id) throws ClienteException {
+		if (!clienteRepository.existsById(id)) {
+			throw new ClienteException("Cliente com ID " + id + " não encontrado para exclusão.");
+		}
+		clienteRepository.deleteById(id);
+	}
 }
