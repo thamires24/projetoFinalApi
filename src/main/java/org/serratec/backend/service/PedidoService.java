@@ -4,24 +4,20 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.serratec.backend.dto.ItemPedidoRequestDTO;
-import org.serratec.backend.dto.PedidoAgendadoDTO;
 import org.serratec.backend.dto.PedidoRequestDTO;
 import org.serratec.backend.dto.PedidoResponseDTO;
 import org.serratec.backend.entity.Cliente;
 import org.serratec.backend.entity.Pedido;
 import org.serratec.backend.entity.PedidoProduto;
 import org.serratec.backend.entity.Produto;
-import org.serratec.backend.enums.StatusEntrega;
 import org.serratec.backend.enums.StatusPedidoEnum;
 import org.serratec.backend.exception.ClienteException;
 import org.serratec.backend.exception.PedidoException;
 import org.serratec.backend.exception.ProdutoException;
 import org.serratec.backend.repository.ClienteRepository;
-import org.serratec.backend.repository.PedidoProdutoRepository;
 import org.serratec.backend.repository.PedidoRepository;
 import org.serratec.backend.repository.ProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,22 +38,13 @@ public class PedidoService {
 	@Autowired
 	private ProdutoRepository produtoRepository;
 
-	@Autowired
-	private PedidoProdutoRepository pedidoProdutoRepository;
-
-	@Autowired
-	private ClienteService clienteService;
-
-	@Autowired
-	private PedidoProdutoService pedidoProdutoService;
-
 	private Cliente getClienteAutenticado() throws ClienteException {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication == null || !authentication.isAuthenticated()
 				|| "anonymousUser".equals(authentication.getPrincipal())) {
 			throw new ClienteException("Nenhum cliente autenticado para realizar a operação.");
 		}
-		String emailClienteAutenticado = authentication.getName();
+		String emailClienteAutenticado = authentication.getName(); 
 		return clienteRepository.findByEmail(emailClienteAutenticado).orElseThrow(
 				() -> new ClienteException("Cliente autenticado não encontrado com email: " + emailClienteAutenticado));
 	}
@@ -104,48 +91,14 @@ public class PedidoService {
 			PedidoProduto pedidoProduto = new PedidoProduto(pedido, produto, itemDto.getQuantidade(), precoVenda,
 					descontoItem);
 			itensPedidoEntities.add(pedidoProduto);
-			valorTotalCalculado = valorTotalCalculado.add(pedidoProduto.calcularSubtotal());
+			valorTotalCalculado = valorTotalCalculado.add(pedidoProduto.calcularSubtotal()); 
 		}
 
 		pedido.setPedidoProduto(itensPedidoEntities);
 		pedido.setValorPedido(valorTotalCalculado.doubleValue());
 
-		Pedido pedidoSalvo = pedidoRepository.save(pedido);
+		Pedido pedidoSalvo = pedidoRepository.save(pedido); 
 		return new PedidoResponseDTO(pedidoSalvo, valorTotalCalculado);
-	}
-
-	@Transactional
-	public Pedido criarPedidoAgendado(PedidoAgendadoDTO dto) throws Exception {
-		Pedido pedido = new Pedido();
-		pedido.setDataPedido(LocalDate.now());
-		pedido.setDataEntrega(dto.getDataEntrega());
-		pedido.setStatusEntrega(StatusEntrega.AGUARDANDO);
-
-		Cliente cliente = clienteRepository.findById(dto.getIdCliente())
-				.orElseThrow(() -> new Exception("Cliente não encontrado"));
-		pedido.setCliente(cliente);
-
-		pedido = pedidoRepository.save(pedido);
-
-		List<PedidoProduto> itens = new ArrayList<>();
-
-		for (ItemPedidoRequestDTO item : dto.getItens()) {
-			Produto produto = produtoRepository.findById(item.getIdProduto())
-					.orElseThrow(() -> new Exception("Produto não encontrado"));
-
-			PedidoProduto pedidoProduto = new PedidoProduto();
-			pedidoProduto.setPedido(pedido);
-			pedidoProduto.setProduto(produto);
-			pedidoProduto.setQuantidadeProduto(item.getQuantidade());
-			pedidoProduto.setDesconto(item.getDesconto());
-			pedidoProduto.setPrecoVenda(BigDecimal.valueOf(produto.getValorUnitario()));
-
-			pedidoProdutoRepository.save(pedidoProduto);
-			itens.add(pedidoProduto);
-		}
-
-		pedido.setPedidoProduto(itens);
-		return pedidoRepository.save(pedido);
 	}
 
 	@Transactional(readOnly = true)
@@ -197,69 +150,4 @@ public class PedidoService {
 		return new PedidoResponseDTO(pedidoAtualizado, valorTotalCalculado);
 	}
 
-	@Transactional
-	public List<Pedido> listarTodos() {
-		return pedidoRepository.findAll();
-	}
-
-	@Transactional
-	public Optional<Pedido> buscarPorIdPedido(Long id) {
-		return pedidoRepository.findById(id);
-	}
-
-	@Transactional
-	public Pedido atualizarPedido(Long pedidoId, Pedido pedidoAtualizado) throws Exception {
-		Optional<Pedido> pedidoOpt = pedidoRepository.findById(pedidoId);
-		if (!pedidoOpt.isPresent()) {
-			throw new Exception("Pedido não encontrado com id: " + pedidoId);
-		}
-		Pedido pedido = pedidoOpt.get();
-		pedido.setStatusPedidoEnum(pedidoAtualizado.getStatusPedidoEnum());
-		pedido.setDataPedido(pedidoAtualizado.getDataPedido());
-		return pedidoRepository.save(pedido);
-	}
-
-	@Transactional
-	public void deletarPedido(Long pedidoId) throws Exception {
-		Pedido pedido = pedidoRepository.findById(pedidoId)
-				.orElseThrow(() -> new Exception("Pedido com ID " + pedidoId + " não encontrado."));
-		pedidoRepository.delete(pedido);
-	}
-
-	@Transactional
-	public BigDecimal calcularValorTotalPedido(Long pedidoId) throws Exception {
-		Pedido pedido = pedidoRepository.findById(pedidoId)
-				.orElseThrow(() -> new Exception("Pedido não encontrado com id: " + pedidoId));
-
-		List<PedidoProduto> itens = pedido.getPedidoProduto();
-		if (itens == null || itens.isEmpty()) {
-			return BigDecimal.ZERO;
-		}
-
-		BigDecimal total = BigDecimal.ZERO;
-		for (PedidoProduto item : itens) {
-			total = total.add(item.calcularSubtotal());
-		}
-
-		pedido.setValorPedido(total.doubleValue());
-		pedidoRepository.save(pedido);
-
-		return total;
-	}
-
-	@Transactional(readOnly = true)
-	public List<Pedido> listarTodosAgendados() {
-		return pedidoRepository.findAll()
-				.stream()
-				.filter(p -> p.getDataEntrega() != null)
-				.collect(Collectors.toList());
-	}
-
-	@Transactional
-	public Pedido atualizarStatusEntrega(Long id, StatusEntrega status) throws Exception {
-		Pedido pedido = pedidoRepository.findById(id)
-				.orElseThrow(() -> new Exception("Pedido não encontrado"));
-		pedido.setStatusEntrega(status);
-		return pedidoRepository.save(pedido);
-	}
 }
