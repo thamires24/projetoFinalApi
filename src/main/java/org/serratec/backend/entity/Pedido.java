@@ -4,10 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
-import org.serratec.backend.enums.StatusEntrega;
 import org.serratec.backend.enums.StatusPedidoEnum;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -24,113 +22,90 @@ import jakarta.persistence.OneToMany;
 @Entity
 public class Pedido {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	private LocalDate dataPedido;
-	private Double valorPedido;
+    private LocalDate dataPedido;
+    private Double valorPedido; 
+    @Enumerated(EnumType.STRING)
+    private StatusPedidoEnum statusPedidoEnum;
 
-	@Enumerated(EnumType.STRING)
-	private StatusPedidoEnum statusPedidoEnum;
+    @ManyToOne
+    @JoinColumn
+    private Cliente cliente;
 
-	@JsonBackReference
-	@ManyToOne
-	@JoinColumn(name = "id_cliente")
-	private Cliente cliente;
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+                          
+    private List<PedidoProduto> pedidoProduto;
 
-	@JsonManagedReference
-	@OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<PedidoProduto> pedidoProduto;
+    public Pedido() {
+    }
 
-	private LocalDate dataEntrega;
+    public Long getId() {
+        return id;
+    }
 
-	@Enumerated(EnumType.STRING)
-	private StatusEntrega statusEntrega;
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public Pedido() {
-	}
+    public LocalDate getDataPedido() {
+        return dataPedido;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public void setDataPedido(LocalDate dataPedido) {
+        this.dataPedido = dataPedido;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public Double getValorPedido() {
+        return valorPedido;
+    }
 
-	public LocalDate getDataPedido() {
-		return dataPedido;
-	}
+    public void setValorPedido(Double valorPedido) {
+        this.valorPedido = valorPedido;
+    }
 
-	public void setDataPedido(LocalDate dataPedido) {
-		this.dataPedido = dataPedido;
-	}
+    public StatusPedidoEnum getStatusPedidoEnum() {
+        return statusPedidoEnum;
+    }
 
-	public Double getValorPedido() {
-		return valorPedido;
-	}
+    public void setStatusPedidoEnum(StatusPedidoEnum statusPedidoEnum) {
+        this.statusPedidoEnum = statusPedidoEnum;
+    }
 
-	public void setValorPedido(Double valorPedido) {
-		this.valorPedido = valorPedido;
-	}
+    public Cliente getCliente() {
+        return cliente;
+    }
 
-	public StatusPedidoEnum getStatusPedidoEnum() {
-		return statusPedidoEnum;
-	}
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
 
-	public void setStatusPedidoEnum(StatusPedidoEnum statusPedidoEnum) {
-		this.statusPedidoEnum = statusPedidoEnum;
-	}
+    public List<PedidoProduto> getPedidoProduto() {
+        return pedidoProduto;
+    }
 
-	public Cliente getCliente() {
-		return cliente;
-	}
+    public void setPedidoProduto(List<PedidoProduto> pedidoProduto) {
+        this.pedidoProduto = pedidoProduto;
+    }
 
-	public void setCliente(Cliente cliente) {
-		this.cliente = cliente;
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, dataPedido, cliente);
+    }
 
-	public List<PedidoProduto> getPedidoProduto() {
-		return pedidoProduto;
-	}
-
-	public void setPedidoProduto(List<PedidoProduto> pedidoProduto) {
-		this.pedidoProduto = pedidoProduto;
-	}
-
-	public LocalDate getDataEntrega() {
-		return dataEntrega;
-	}
-
-	public void setDataEntrega(LocalDate dataEntrega) {
-		this.dataEntrega = dataEntrega;
-	}
-
-	public StatusEntrega getStatusEntrega() {
-		return statusEntrega;
-	}
-
-	public void setStatusEntrega(StatusEntrega statusEntrega) {
-		this.statusEntrega = statusEntrega;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(id, dataPedido, cliente);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Pedido other = (Pedido) obj;
-		return Objects.equals(id, other.id) &&
-		       Objects.equals(dataPedido, other.dataPedido) &&
-		       Objects.equals(cliente, other.cliente);
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Pedido other = (Pedido) obj;
+        return Objects.equals(id, other.id) && Objects.equals(dataPedido, other.dataPedido)
+                && Objects.equals(cliente, other.cliente);
+    }
 }
